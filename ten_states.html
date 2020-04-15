@@ -1,0 +1,142 @@
+<html lang='en'>
+<head>
+   <meta charset='UTF-8'>
+   <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+   <script src = 'https://d3js.org/d3.v4.min.js'></script>
+   <style>
+      head,body,div{
+         user-select: none; /* standard syntax */
+         -webkit-user-select: none; /* webkit (safari, chrome) browsers */
+         -moz-user-select: none; /* mozilla browsers */
+         -khtml-user-select: none; /* webkit (konqueror) browsers */
+         -ms-user-select: none; /* IE10+ */
+         width: 100%;
+         height: 100%;
+         margin: 0;
+         padding: 0;
+         background-color:white;
+         text-align: center;
+      }
+      .active {
+        stroke: rgb(255, 39, 93);
+        stroke-width: 3px;
+        stroke-opacity: 1;
+      }
+      .activeS {
+        fill: rgb(255, 39, 93);
+        fill-opacity: 1;
+      }
+      .over {
+         stroke:rgb(59, 232, 255);
+         stroke-width: 3px;
+         stroke-opacity: 1;
+      }
+      .overS {
+         fill: rgb(59, 232, 255);
+         fill-opacity: 1;
+      }
+   </style>
+</head>
+<body>
+   <div id='tavola'></div>
+   
+   <script>
+   var radiusCircle = innerWidth/2.5;
+
+      var svg = d3.select('#tavola').append('svg');
+      svg.attr('width','100%');
+      svg.attr('height','100%');
+
+      var groups = [];
+      var dataidx = [0,1,2,3,4,5,6,7,8,9];
+      for (let i = 0; i < dataidx.length; i++) {
+         groups.push(svg.append('g'));
+      }
+
+      for (let i = 0; i < groups.length; i++) {
+         groups[i].append('circle')
+         .attr('r','40px')
+         .attr('cx',function (){
+            var x0 = Math.round(innerWidth/2);
+            return x0+radiusCircle*Math.cos(6.28/10.0*i);
+         })
+         .attr('cy',function (){
+            var y0 = Math.round(innerHeight/2);
+            return y0+radiusCircle*Math.sin(6.28/10.0*i);
+         })
+         .attr('fill','lightgrey')
+         .attr('fill-opacity',0.2);
+         
+         groups[i].append('text')
+         .attr('transform',function (){
+            var angle = 6.28/10.0*i;
+            var x0 = Math.round(innerWidth/2)+radiusCircle*Math.cos(angle);
+            var y0 = Math.round(innerHeight/2)+radiusCircle*Math.sin(angle);
+
+            var out = 'translate('+x0.toString()+','+y0.toString()+')';
+            var rotation = (angle*180/3.14);
+            rotation = (rotation>=180)? rotation-180:rotation;
+            rotation = (rotation>=90)? rotation-180:rotation;
+            out += 'rotate('+rotation.toString()+')';
+            return out;
+         })
+         .attr('text-anchor','middle')
+         .attr('alignment-baseline','middle')
+         .attr('font-family', 'sans-serif')
+         .text(function(){
+            return 'state '+i.toString();
+         })
+         .attr('fill','black');
+         for (let j = 0; j < dataidx.length; j++) {
+            if (i!==j){
+            groups[i].append('path')
+               .attr('d',function(){
+                  var path = d3.path();
+                  var angle = 6.28/10.0*i;
+                  var x0 = Math.round(innerWidth/2)+radiusCircle*0.8*Math.cos(angle);
+                  var y0 = Math.round(innerHeight/2)+radiusCircle*0.8*Math.sin(angle);
+                  path.moveTo(x0,y0);
+
+                  var angle1 = 6.28/10.0*j;
+                  var x1 = Math.round(innerWidth/2)+radiusCircle*0.8*Math.cos(angle1);
+                  var y1 = Math.round(innerHeight/2)+radiusCircle*0.8*Math.sin(angle1);
+                  path.quadraticCurveTo(innerWidth/2,innerHeight/2,x1,y1);
+                  return path;
+               })
+              .attr('stroke', 'lightgrey')
+              .attr('stroke-opacity',0.2)
+              .attr('stroke-width', 1)
+              .attr('fill', 'none')
+            }
+            }
+         
+
+         groups[i].on('click',function(){
+            d3.select(this).selectAll('circle')
+            .classed('activeS', d3.select(this).selectAll('circle').classed('activeS') ? false : true);
+
+            d3.select(this).selectAll('path')
+            .classed('active', d3.select(this).selectAll('path').classed('active') ? false : true);
+         });
+
+         groups[i].on('mouseover',function(){
+            d3.select(this).selectAll('circle')
+            .classed('overS', true);
+
+            d3.select(this).selectAll('path')
+            .classed('over', true);
+         });
+
+         groups[i].on('mouseout',function(){
+            d3.select(this).selectAll('circle')
+            .classed('overS', false);
+
+            d3.select(this).selectAll('path')
+            .classed('over', false);
+         });
+
+
+      }
+   </script>
+</body>
+</html>
